@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="   
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd   
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd   
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd 
+            http://www.springframework.org/schema/context 
+            http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- 配置本地连接数据库的属性文件   读取数据库配置文件 -->
+	<context:property-placeholder location="classpath:database.properties" />
+	<!--配置扫描包 dao service -->
+	<context:component-scan base-package="com.weixinDemo.service" />
+	<context:component-scan base-package="com.weixinDemo.dao" />
+
+	<!-- 数据库连接池 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${jdbc.driver}"/>
+		<property name="jdbcUrl" value="${jdbc.url}"/>
+		<property name="user" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
+		<property name="maxPoolSize" value="${c3p0.maxPoolSize}"/>
+		<property name="minPoolSize" value="${c3p0.minPoolSize}"/>
+		<property name="autoCommitOnClose" value="${c3p0.autoCommitOnClose}"/>
+		<property name="checkoutTimeout" value="${c3p0.checkoutTimeout}"/>
+		<property name="acquireRetryAttempts" value="${c3p0.acquireRetryAttempts}"/>
+	</bean>
+    <!-- 配置mybitas SqlSessionFactoryBean-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    	<property name="dataSource" ref="dataSource"/>
+    	<property name="configLocation" value="classpath:mybatis-config.xml"/>
+    </bean>
+
+   	<!-- AOP 事务处理 开始 -->    
+	<aop:aspectj-autoproxy />
+	<!-- 事务管理 -->
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    	<property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- 通过<tx:advice>配置事务增强，绑定事务管理器并针对不同方法定义事务规则 -->
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="get*" propagation="SUPPORTS" />
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+	<!--增加到哪些方法上  -->
+    <aop:config>
+		<aop:pointcut expression="execution(* com.weixinDemo.service..*.*(..))"
+			id="txpoint" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txpoint" />
+	</aop:config>
+    
+    
+    
+    <!--配置事物注解解析  -->
+    <tx:annotation-driven transaction-manager="txManager"/>
+	
+	<!--因为结合Mybatis 没有实现类只有接口 因此下面的配置不能少  -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">  
+         <property name="basePackage" value="com.weixinDemo.dao" />
+    </bean>
+    
+    
+    
+    
+
+</beans>

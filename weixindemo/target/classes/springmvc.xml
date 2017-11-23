@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+    	   http://www.springframework.org/schema/context/spring-context-3.2.xsd
+    	   http://www.springframework.org/schema/mvc
+           http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<!--静态资源包 -->
+	<!--<mvc:resources location="/statics/" mapping="/statics/**" />-->
+	<!--配置扫描包，直接通过注解就可 -->
+	<context:component-scan base-package="com.weixinDemo.controller" />
+	<!--配置注解解析器 json转换数据 以及json中的编码 配置时间绑定 -->
+	<mvc:annotation-driven conversion-service="conversionService">
+		<mvc:message-converters>
+			<!-- springmvc框架中的包来配置json解析数据乱码问题 -->
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>application/json;charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+			<!--导入json java包来解决中文乱码 时间绑定 以及json数据转换 -->
+			<bean
+				class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<!-- 编码解析器 -->
+						<value>text/html;charset=UTF-8</value>
+						<!-- json数据解析器 -->
+						<value>application/json</value>
+					</list>
+				</property>
+				<!--Date的日期转换器 -->
+				<property name="features">
+					<list>
+						<value>WriteDateUseDateFormat</value>
+					</list>
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	<!-- 配置jsp 显示ViewResolver -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+		<property name="prefix" value="/WEB-INF/views/"/>
+		<property name="suffix" value=".html"/>
+	</bean>
+
+
+	<!--&lt;!&ndash; 全局异常处理器 &ndash;&gt;-->
+	<!--<bean-->
+		<!--class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">-->
+		<!--<property name="exceptionMappings">-->
+			<!--<props>-->
+				<!--<prop key="RuntimeException">error</prop>-->
+			<!--</props>-->
+		<!--</property>-->
+	<!--</bean>-->
+
+	<!--配置MultipartResolver，用于上传文件，使用spring的CommonsMultipartResolver -->
+
+	<!--<bean id="multipartResolver"-->
+		<!--class="org.springframework.web.multipart.commons.CommonsMultipartResolver">-->
+		<!--<property name="maxUploadSize" value="5000000" />-->
+		<!--<property name="defaultEncoding" value="UTF-8" />-->
+	<!--</bean>-->
+
+
+	<!-- 自定义转换器 实现 时间数据无法自动转换绑定 -->
+	<bean id="conversionService"
+		class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters">
+			<list>
+				<bean class="com.weixinDemo.utils.StringToDateConverter">
+					<constructor-arg>
+						<value>yyyy-MM-dd</value>
+					</constructor-arg>
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
+	<!--&lt;!&ndash;配置拦截器 &ndash;&gt;-->
+	<!--<mvc:interceptors>-->
+		<!--<mvc:interceptor>-->
+			<!--<mvc:mapping path="/user/sys/**" />-->
+			<!--<bean class="com.weixinDemo.interceptor.SysInterceptor" />-->
+		<!--</mvc:interceptor>-->
+	<!--</mvc:interceptors>-->
+
+ 
+
+
+</beans>

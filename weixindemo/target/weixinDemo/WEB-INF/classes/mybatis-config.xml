@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!--设置是否是全映射 -->
+	<settings>
+		<setting name="autoMappingBehavior" value="FULL" />
+		<setting name="lazyLoadingEnabled" value="false" />
+
+	</settings>
+	<!--配置别名 -->
+	<typeAliases>
+		<!-- <typeAlias type="test.pojo.User" alias="User"/> -->
+		<package name="con.weixinDemo.pojo"/>
+	</typeAliases>
+	
+
+</configuration>
